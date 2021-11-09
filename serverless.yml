@@ -1,0 +1,84 @@
+service: parkingbooth
+frameworkVersion: "2"
+
+plugins:
+  - serverless-step-functions
+
+provider:
+  name: aws
+  memorySize: 128
+  timeout: 3
+  runtime: go1.x
+  lambdaHashingVersion: 20201221
+
+  stage: dev
+  region: us-east-1
+
+  apiGateway:
+    apiKeys:
+      - testkey
+
+  #  iamRoleStatements:
+  #    - Effect: "Allow"
+  #      Action:
+  #        - "s3:ListBucket"
+  #      Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
+  #    - Effect: "Allow"
+  #      Action:
+  #        - "s3:PutObject"
+  #      Resource:
+  #        Fn::Join:
+  #          - ""
+  #          - - "arn:aws:s3:::"
+  #            - "Ref" : "ServerlessDeploymentBucket"
+  #            - "/*"
+
+  environment:
+    TICKET_REPORT_BUCKET: !Ref TicketReportBucket
+    ACCOUNT_REPORT_BUCKET: !Ref AccountReportBucket
+    variable1: value1
+
+package:
+  patterns:
+    - "!./**"
+    - ./bin/**
+
+functions:
+  generateTicket:
+    handler: bin/generate-ticket
+    reservedConcurrency: 1
+    events:
+      - http:
+          path: /ticket/in
+          method: post
+
+  completeTicket:
+    handler: bin/complete-ticket
+    reservedConcurrency: 1
+    events:
+      - http:
+          path: /ticket/out
+          method: post
+
+  payTicket:
+    handler: bin/pay-ticket
+    reservedConcurrency: 1
+    events:
+      - http:
+          path: /ticket/pay
+          method: post
+
+  generateTicketReport:
+    handler: bin/generate-ticket-report
+    reservedConcurrency: 1
+
+  generateAccountReport:
+    handler: bin/generate-account-report
+    reservedConcurrency: 1
+
+resources:
+  - ${file(./cfn-resources/s3-resources.yaml)}
+  # - ${file(./cfn-resources/eventbridge-resources.yaml)}
+  # - ${file(./cfn-resources/sfn-resources.yaml)}
+  # - ${file(./cfn-resources/iam-resources.yaml)}
+  # - ${file(./cfn-resources/rds-resources.yaml)}
