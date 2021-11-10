@@ -12,7 +12,8 @@ provider:
   runtime: go1.x
   lambdaHashingVersion: 20201221
 
-  stage: dev
+  stage: ${opt:stage, 'dev'}
+
   region: us-east-1
 
   apiGateway:
