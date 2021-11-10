@@ -52,6 +52,10 @@ functions:
       - http:
           path: /ticket/in
           method: post
+    vpc:
+      subnetIds: ${file(./serverless.${self:provider.stage}.yml):subnets}
+      securityGroupIds:
+        - !Ref lambdaSecurityGroup
 
   completeTicket:
     handler: bin/complete-ticket
@@ -60,6 +64,10 @@ functions:
       - http:
           path: /ticket/out
           method: post
+    vpc:
+      subnetIds: ${file(./serverless.${self:provider.stage}.yml):subnets}
+      securityGroupIds:
+        - !Ref lambdaSecurityGroup
 
   payTicket:
     handler: bin/pay-ticket
@@ -68,6 +76,10 @@ functions:
       - http:
           path: /ticket/pay
           method: post
+    vpc:
+      subnetIds: ${file(./serverless.${self:provider.stage}.yml):subnets}
+      securityGroupIds:
+        - !Ref lambdaSecurityGroup
 
   generateTicketReport:
     handler: bin/generate-ticket-report
