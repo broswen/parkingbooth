@@ -1,0 +1,54 @@
+Resources:
+  postgresSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      SubnetIds: ${file(serverless.${self:provider.stage}.yml):subnets}
+      DBSubnetGroupDescription: postgres subnets
+
+  postgresSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      GenerateSecretString:
+        SecretStringTemplate: '{"username": "postgres"}'
+        GenerateStringKey: password
+        PasswordLength: 16
+        ExcludeCharacters: "\"'@/\\"
+
+  postgresSecretAttachment:
+    Type: AWS::SecretsManager::SecretTargetAttachment
+    Properties:
+      SecretId: !Ref postgresSecret
+      TargetId: !Ref postgres
+      TargetType: AWS::RDS::DBInstance
+
+  postgres:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      AllocatedStorage: "20"
+      DBInstanceClass: db.t2.micro
+      DBSubnetGroupName: !Ref postgresSubnetGroup
+      Engine: postgres
+      MasterUsername:
+        !Join [
+          "",
+          [
+            "{{resolve:secretsmanager:",
+            !Ref postgresSecret,
+            ":SecretString:username}}",
+          ],
+        ]
+      MasterUserPassword:
+        !Join [
+          "",
+          [
+            "{{resolve:secretsmanager:",
+            !Ref postgresSecret,
+            ":SecretString:password}}",
+          ],
+        ]
+      MultiAZ: false
+      Port: "5432"
+      PubliclyAccessible: true
+      StorageType: gp2
+      VPCSecurityGroups:
+        - !Ref postgresSecurityGroup

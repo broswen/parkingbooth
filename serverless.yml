@@ -37,7 +37,7 @@ provider:
   environment:
     TICKET_REPORT_BUCKET: !Ref TicketReportBucket
     ACCOUNT_REPORT_BUCKET: !Ref AccountReportBucket
-    variable1: value1
+    DB_SECRET_ARN: !Ref postgresSecret
 
 package:
   patterns:
@@ -79,7 +79,8 @@ functions:
 
 resources:
   - ${file(./cfn-resources/s3-resources.yaml)}
+  - ${file(./cfn-resources/vpc-resources.yaml)}
   # - ${file(./cfn-resources/eventbridge-resources.yaml)}
   # - ${file(./cfn-resources/sfn-resources.yaml)}
   # - ${file(./cfn-resources/iam-resources.yaml)}
-  # - ${file(./cfn-resources/rds-resources.yaml)}
+  - ${file(./cfn-resources/rds-resources.yaml)}
