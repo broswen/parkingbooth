@@ -4,15 +4,20 @@ import (
 	"context"
 	"encoding/json"
 	"log"
+	"os"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
 	"github.com/broswen/parkingbooth/models"
 	"github.com/broswen/parkingbooth/repository"
 	"github.com/broswen/parkingbooth/ticket"
 )
 
 var ticketService *ticket.Service
+var smClient *secretsmanager.Client
 
 func Handler(ctx context.Context, event events.APIGatewayProxyRequest) (models.APIGResponse, error) {
 	var generateTicketRequest models.GenerateTicketRequest
@@ -30,7 +35,28 @@ func Handler(ctx context.Context, event events.APIGatewayProxyRequest) (models.A
 }
 
 func init() {
-	var err error
+	cfg, err := config.LoadDefaultConfig(context.TODO())
+	if err != nil {
+		log.Fatalf("unable to load SDK config, %v", err)
+	}
+
+	// Using the Config value, create the DynamoDB client
+	smClient = secretsmanager.NewFromConfig(cfg)
+
+	response, err := smClient.GetSecretValue(context.TODO(), &secretsmanager.GetSecretValueInput{
+		SecretId: aws.String(os.Getenv("DB_SECRET_ARN")),
+	})
+	if err != nil {
+		log.Fatalf("get secret value, %v", err)
+	}
+	secret := make(map[string]string)
+	err = json.Unmarshal(response.SecretBinary, &secret)
+	if err != nil {
+		log.Fatalf("marshal secret value, %v", err)
+	}
+	log.Printf("%#v\n", secret)
+
+	// TODO pass secret values from above
 	repo, err := repository.NewRepository("postgres")
 	if err != nil {
 		log.Fatalf("new repository: %v\n", err)
