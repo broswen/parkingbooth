@@ -1,35 +1,39 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
+	"log"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/broswen/parkingbooth/models"
+	"github.com/broswen/parkingbooth/ticket"
 )
 
-type Response events.APIGatewayProxyResponse
+var ticketService *ticket.Service
 
-// Handler is our lambda handler invoked by the `lambda.Start` function call
-func Handler(ctx context.Context) (Response, error) {
-	var buf bytes.Buffer
-
-	body, err := json.Marshal(map[string]interface{}{
-		"message": "Go Serverless v1.0! Your function executed successfully!",
-	})
+func Handler(ctx context.Context, event events.APIGatewayProxyRequest) (models.APIGResponse, error) {
+	var generateTicketRequest models.GenerateTicketRequest
+	err := json.Unmarshal([]byte(event.Body), &generateTicketRequest)
 	if err != nil {
-		return Response{StatusCode: 404}, err
-	}
-	json.HTMLEscape(&buf, body)
-
-	resp := Response{
-		StatusCode:      200,
-		IsBase64Encoded: false,
-		Body:            buf.String(),
+		return models.GenerateError(err.Error(), 400)
 	}
 
-	return resp, nil
+	ticket, err := ticketService.GenerateTicket(generateTicketRequest.Location)
+	if err != nil {
+		return models.GenerateError(err.Error(), 500)
+	}
+
+	return models.GenerateResponse(ticket, 200)
+}
+
+func init() {
+	var err error
+	ticketService, err = ticket.New()
+	if err != nil {
+		log.Fatalf("new ticket service: %v\n", err)
+	}
 }
 
 func main() {
