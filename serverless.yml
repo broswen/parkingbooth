@@ -3,6 +3,7 @@ frameworkVersion: "2"
 
 plugins:
   - serverless-step-functions
+  - serverless-offline
 
 provider:
   name: aws
