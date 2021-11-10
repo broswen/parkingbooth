@@ -26,7 +26,7 @@ func (ts *Service) GenerateTicket(location string) (repository.Ticket, error) {
 	t := repository.Ticket{
 		Id:       id.String(),
 		Location: location,
-		Start:    time.Now(),
+		Start:    time.Now().Unix(),
 	}
 	t, err = ts.repo.SaveTicket(t)
 	if err != nil {
@@ -49,8 +49,8 @@ func (ts *Service) CompleteTicket(location, id string) (repository.Ticket, error
 	if err != nil {
 		return repository.Ticket{}, err
 	}
-	ticket.Stop = time.Now()
-	ticket.Duration = ticket.Stop.Sub(ticket.Start)
+	ticket.Stop = time.Now().Unix()
+	ticket.Duration = ticket.Stop - ticket.Start
 	ticket, err = ts.repo.SaveTicket(ticket)
 	if err != nil {
 		return repository.Ticket{}, err

@@ -4,16 +4,17 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
-	"time"
+
+	_ "github.com/lib/pq"
 )
 
 type Ticket struct {
-	Id       string        `json:"id"`
-	Location string        `json:"location"`
-	Start    time.Time     `json:"start"`
-	Stop     time.Time     `json:"stop,omitempty"`
-	Duration time.Duration `json:"duration,omitempty"`
-	Payment  string        `json:"payment,omitempty"`
+	Id       string `json:"id"`
+	Location string `json:"location"`
+	Start    int64  `json:"start"`
+	Stop     int64  `json:"stop,omitempty"`
+	Duration int64  `json:"duration,omitempty"`
+	Payment  string `json:"payment,omitempty"`
 }
 
 type TicketRepository interface {
@@ -88,9 +89,9 @@ func (mr MapRepository) SaveTicket(t Ticket) (Ticket, error) {
 
 func (pr PostgresRepository) GetTicket(location, id string) (Ticket, error) {
 	getStatement := `
-	SELECT * FROM tickets WHERE location=$1 AND id =$2`
+	SELECT * FROM tickets WHERE location_id=$1 AND id=$2`
 	var ticket Ticket
-	err := pr.db.QueryRow(getStatement, location, id).Scan(&ticket)
+	err := pr.db.QueryRow(getStatement, location, id).Scan(&ticket.Id, &ticket.Location, &ticket.Start, &ticket.Stop, &ticket.Duration, &ticket.Payment)
 	if err != nil {
 		return Ticket{}, err
 	}
@@ -99,12 +100,11 @@ func (pr PostgresRepository) GetTicket(location, id string) (Ticket, error) {
 
 func (pr PostgresRepository) SaveTicket(t Ticket) (Ticket, error) {
 	insertStatement := `
-	INSERT INTO tickets(id, location, start, stop, duration, payment) VALUES ($1, $2, $3, $4, $5, $6) ON CONSTRAINT location_id
-	DO UPDATE SET start=$3, stop=$4, duration=$5, payment=$6`
-	var ticket Ticket
-	err := pr.db.QueryRow(insertStatement, t.Id, t.Location, t.Start, t.Stop, t.Duration, t.Payment).Scan(&ticket)
+	INSERT INTO tickets(id, location_id, start_epoch, stop_epoch, duration_seconds, payment_id) VALUES($1, $2, $3, $4, $5, $6) ON CONFLICT ON CONSTRAINT tickets_id_location_id_key
+	DO UPDATE SET start_epoch=$3, stop_epoch=$4, duration_seconds=$5, payment_id=$6`
+	_, err := pr.db.Exec(insertStatement, t.Id, t.Location, t.Start, t.Stop, t.Duration, t.Payment)
 	if err != nil {
 		return Ticket{}, err
 	}
-	return ticket, nil
+	return t, nil
 }

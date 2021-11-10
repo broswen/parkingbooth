@@ -16,8 +16,8 @@ func TestSaveTicket(t *testing.T) {
 	t1 := Ticket{
 		Id:       "test",
 		Location: "test",
-		Start:    time.Now(),
-		Stop:     time.Now(),
+		Start:    time.Now().Unix(),
+		Stop:     time.Now().Unix(),
 		Payment:  "test",
 	}
 
@@ -41,8 +41,8 @@ func TestGetTicket(t *testing.T) {
 	t1 := Ticket{
 		Id:       "test",
 		Location: "test",
-		Start:    time.Now(),
-		Stop:     time.Now(),
+		Start:    time.Now().Unix(),
+		Stop:     time.Now().Unix(),
 		Payment:  "test",
 	}
 
