@@ -30,7 +30,7 @@ func Handler(ctx context.Context, event events.APIGatewayProxyRequest) (models.A
 
 func init() {
 	var err error
-	ticketService, err = ticket.New()
+	ticketService, err = ticket.NewService()
 	if err != nil {
 		log.Fatalf("new ticket service: %v\n", err)
 	}
