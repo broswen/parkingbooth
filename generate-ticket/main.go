@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/broswen/parkingbooth/models"
+	"github.com/broswen/parkingbooth/repository"
 	"github.com/broswen/parkingbooth/ticket"
 )
 
@@ -30,7 +31,11 @@ func Handler(ctx context.Context, event events.APIGatewayProxyRequest) (models.A
 
 func init() {
 	var err error
-	ticketService, err = ticket.NewService()
+	repo, err := repository.NewRepository("postgres")
+	if err != nil {
+		log.Fatalf("new repository: %v\n", err)
+	}
+	ticketService, err = ticket.NewService(repo)
 	if err != nil {
 		log.Fatalf("new ticket service: %v\n", err)
 	}
