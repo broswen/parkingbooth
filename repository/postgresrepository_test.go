@@ -3,19 +3,20 @@ package repository
 import (
 	"fmt"
 	"math/rand"
-	"os"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/broswen/parkingbooth/models"
 )
 
 func TestSaveTicketPostgres(t *testing.T) {
-	os.Setenv("POSTGRES_HOST", "localhost")
-	os.Setenv("POSTGRES_USER", "postgres")
-	os.Setenv("POSTGRES_PASS", "password")
-	os.Setenv("POSTGRES_PORT", "5432")
-	os.Setenv("POSTGRES_DB", "postgres")
-	repo, err := NewRepository("postgres")
+	repo, err := NewPostgres(models.PostgresCredentials{
+		Host:     "localhost",
+		Port:     5432,
+		Password: "password",
+		Username: "postgres",
+	})
 	if err != nil {
 		t.Fatalf("init map repo: %v\n", err)
 	}
@@ -39,12 +40,12 @@ func TestSaveTicketPostgres(t *testing.T) {
 }
 
 func TestGetTicketPostgres(t *testing.T) {
-	os.Setenv("POSTGRES_HOST", "localhost")
-	os.Setenv("POSTGRES_USER", "postgres")
-	os.Setenv("POSTGRES_PASS", "password")
-	os.Setenv("POSTGRES_PORT", "5432")
-	os.Setenv("POSTGRES_DB", "postgres")
-	repo, err := NewRepository("postgres")
+	repo, err := NewPostgres(models.PostgresCredentials{
+		Host:     "localhost",
+		Port:     5432,
+		Password: "password",
+		Username: "postgres",
+	})
 	if err != nil {
 		t.Fatalf("init map repo: %v\n", err)
 	}

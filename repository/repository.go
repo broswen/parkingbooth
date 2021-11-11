@@ -3,8 +3,8 @@ package repository
 import (
 	"database/sql"
 	"fmt"
-	"os"
 
+	"github.com/broswen/parkingbooth/models"
 	_ "github.com/lib/pq"
 )
 
@@ -30,39 +30,30 @@ type PostgresRepository struct {
 	db *sql.DB
 }
 
-func NewRepository(t string) (TicketRepository, error) {
-	switch t {
-	case "map":
-		return MapRepository{
-			m: make(map[string]map[string]Ticket, 0),
-		}, nil
-	case "postgres":
-		host := os.Getenv("POSTGRES_HOST")
-		port := os.Getenv("POSTGRES_PORT")
-		user := os.Getenv("POSTGRES_USER")
-		password := os.Getenv("POSTGRES_PASS")
-		dbname := os.Getenv("POSTGRES_DB")
-		connString := fmt.Sprintf("host=%s port=%s user=%s "+
-			"password=%s dbname=%s sslmode=disable",
-			host, port, user, password, dbname)
+func NewPostgres(creds models.PostgresCredentials) (TicketRepository, error) {
+	connString := fmt.Sprintf("host=%s port=%d user=%s "+
+		"password=%s dbname=%s sslmode=disable",
+		creds.Host, creds.Port, creds.Username, creds.Password, "postgres")
 
-		db, err := sql.Open("postgres", connString)
-		if err != nil {
-			return nil, fmt.Errorf("sql open: %v\n", err)
-		}
-
-		err = db.Ping()
-		if err != nil {
-			return nil, fmt.Errorf("db ping: %v\n", err)
-		}
-
-		return PostgresRepository{
-			db: db,
-		}, nil
-
-	default:
-		return nil, fmt.Errorf("unknown repository type: %v\n", t)
+	db, err := sql.Open("postgres", connString)
+	if err != nil {
+		return nil, fmt.Errorf("sql open: %v\n", err)
 	}
+
+	err = db.Ping()
+	if err != nil {
+		return nil, fmt.Errorf("db ping: %v\n", err)
+	}
+
+	return PostgresRepository{
+		db: db,
+	}, nil
+}
+
+func NewMap() (TicketRepository, error) {
+	return MapRepository{
+		m: make(map[string]map[string]Ticket, 0),
+	}, nil
 }
 
 func (mr MapRepository) GetTicket(location, id string) (Ticket, error) {

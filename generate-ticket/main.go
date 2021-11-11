@@ -49,15 +49,14 @@ func init() {
 	if err != nil {
 		log.Fatalf("get secret value, %v", err)
 	}
-	secret := make(map[string]string)
-	err = json.Unmarshal(response.SecretBinary, &secret)
+	var postgresCreds models.PostgresCredentials
+	err = json.Unmarshal([]byte(*response.SecretString), &postgresCreds)
 	if err != nil {
 		log.Fatalf("marshal secret value, %v", err)
 	}
-	log.Printf("%#v\n", secret)
 
 	// TODO pass secret values from above
-	repo, err := repository.NewRepository("postgres")
+	repo, err := repository.NewPostgres(postgresCreds)
 	if err != nil {
 		log.Fatalf("new repository: %v\n", err)
 	}

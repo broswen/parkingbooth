@@ -16,6 +16,14 @@ type GenerateTicketRequest struct {
 
 type APIGResponse events.APIGatewayProxyResponse
 
+type PostgresCredentials struct {
+	Username             string `json:"username"`
+	Password             string `json:"password"`
+	Port                 int    `json:"port"`
+	Host                 string `json:"host"`
+	DBInstanceIdentifier string `json:"dbInstanceIdentifier"`
+}
+
 func GenerateResponse(i interface{}, status int) (APIGResponse, error) {
 
 	body, err := json.Marshal(i)

@@ -8,7 +8,7 @@ import (
 
 func TestSaveTicket(t *testing.T) {
 
-	repo, err := NewRepository("map")
+	repo, err := NewMap()
 	if err != nil {
 		t.Fatalf("init map repo: %v\n", err)
 	}
@@ -33,7 +33,7 @@ func TestSaveTicket(t *testing.T) {
 
 func TestGetTicket(t *testing.T) {
 
-	repo, err := NewRepository("map")
+	repo, err := NewMap()
 	if err != nil {
 		t.Fatalf("init map repo: %v\n", err)
 	}
