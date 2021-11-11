@@ -20,20 +20,15 @@ provider:
     apiKeys:
       - testkey
 
-  #  iamRoleStatements:
-  #    - Effect: "Allow"
-  #      Action:
-  #        - "s3:ListBucket"
-  #      Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
-  #    - Effect: "Allow"
-  #      Action:
-  #        - "s3:PutObject"
-  #      Resource:
-  #        Fn::Join:
-  #          - ""
-  #          - - "arn:aws:s3:::"
-  #            - "Ref" : "ServerlessDeploymentBucket"
-  #            - "/*"
+  iam:
+    role:
+      statements:
+        # lambda silently times out if permission is not allowed, regardless of VPCE/security groups
+        - Effect: "Allow"
+          Action:
+            - secretsmanager:GetSecretValue
+          Resource:
+            - !Ref postgresSecret
 
   environment:
     TICKET_REPORT_BUCKET: !Ref TicketReportBucket
