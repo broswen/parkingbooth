@@ -22,12 +22,19 @@ Resources:
       TargetType: AWS::RDS::DBInstance
 
   postgres:
-    Type: AWS::RDS::DBInstance
+    Type: AWS::RDS::DBCluster
     Properties:
       AllocatedStorage: "20"
       DBInstanceClass: db.t3.micro
       DBSubnetGroupName: !Ref postgresSubnetGroup
-      Engine: postgres
+      Engine: aurora-postgres
+      EngineMode: serverless
+      ScalingConfiguration:
+        Autopause: true
+        SecondsUntilAutoPause: 300
+        MaxCapacity: 2
+        MinCapacity: 2
+      EnableHttpEndpoint: true
       MasterUsername:
         !Join [
           "",
@@ -48,7 +55,5 @@ Resources:
         ]
       MultiAZ: false
       Port: "5432"
-      PubliclyAccessible: true
-      StorageType: gp2
       VPCSecurityGroups:
         - !Ref postgresSecurityGroup
