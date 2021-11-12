@@ -30,7 +30,7 @@ provider:
             - dynamodb:UpdateItem
           Resource:
             - !GetAtt TicketTable.Arn
-          - Effect: "Allow"
+        - Effect: "Allow"
           Action:
             - dynamodb:GetItem
             - dynamodb:PutItem
