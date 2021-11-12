@@ -31,7 +31,7 @@ func Handler(ctx context.Context, event events.APIGatewayProxyRequest) (models.A
 }
 
 func init() {
-	repo, err := repository.NewDynamoDB(os.Getenv("TABLE"))
+	repo, err := repository.NewDynamoDB(os.Getenv("TICKETTABLE"))
 	if err != nil {
 		log.Fatalf("new repository: %v\n", err)
 	}

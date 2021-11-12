@@ -1,9 +1,9 @@
 Resources:
-  TicketReportBucket:
+  TicketEventBucket:
     Type: AWS::S3::Bucket
     Properties:
       AccessControl: Private
-  AccountReportBucket:
+  AccountEventBucket:
     Type: AWS::S3::Bucket
     Properties:
       AccessControl: Private
