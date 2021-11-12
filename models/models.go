@@ -14,6 +14,17 @@ type GenerateTicketRequest struct {
 	Location string `json:"location"`
 }
 
+type CompleteTicketRequest struct {
+	Location string `json:"location"`
+	Id       string `json:"id"`
+}
+
+type PayTicketRequest struct {
+	Location string `json:"location"`
+	Id       string `json:"id"`
+	Payment  string `json:"payment"`
+}
+
 type APIGResponse events.APIGatewayProxyResponse
 
 type PostgresCredentials struct {

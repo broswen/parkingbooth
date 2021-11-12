@@ -1,35 +1,44 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
+	"log"
+	"os"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/broswen/parkingbooth/models"
+	"github.com/broswen/parkingbooth/repository"
+	"github.com/broswen/parkingbooth/ticket"
 )
 
-type Response events.APIGatewayProxyResponse
+var ticketService *ticket.Service
 
-// Handler is our lambda handler invoked by the `lambda.Start` function call
-func Handler(ctx context.Context) (Response, error) {
-	var buf bytes.Buffer
-
-	body, err := json.Marshal(map[string]interface{}{
-		"message": "Go Serverless v1.0! Your function executed successfully!",
-	})
+func Handler(ctx context.Context, event events.APIGatewayProxyRequest) (models.APIGResponse, error) {
+	var completeTicketRequest models.CompleteTicketRequest
+	err := json.Unmarshal([]byte(event.Body), &completeTicketRequest)
 	if err != nil {
-		return Response{StatusCode: 404}, err
-	}
-	json.HTMLEscape(&buf, body)
-
-	resp := Response{
-		StatusCode:      200,
-		IsBase64Encoded: false,
-		Body:            buf.String(),
+		return models.GenerateError(err.Error(), 400)
 	}
 
-	return resp, nil
+	ticket, err := ticketService.CompleteTicket(completeTicketRequest.Location, completeTicketRequest.Id)
+	if err != nil {
+		return models.GenerateError(err.Error(), 500)
+	}
+
+	return models.GenerateResponse(ticket, 200)
+}
+
+func init() {
+	repo, err := repository.NewDynamoDB(os.Getenv("TABLE"))
+	if err != nil {
+		log.Fatalf("new repository: %v\n", err)
+	}
+	ticketService, err = ticket.NewService(repo)
+	if err != nil {
+		log.Fatalf("new ticket service: %v\n", err)
+	}
 }
 
 func main() {
