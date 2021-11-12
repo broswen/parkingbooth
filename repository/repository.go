@@ -1,9 +1,15 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
+	"log"
+	"strconv"
 
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/broswen/parkingbooth/models"
 	_ "github.com/lib/pq"
 )
@@ -30,6 +36,11 @@ type PostgresRepository struct {
 	db *sql.DB
 }
 
+type DynamoDBRepository struct {
+	TableName string
+	ddb       *dynamodb.Client
+}
+
 func NewPostgres(creds models.PostgresCredentials) (TicketRepository, error) {
 	connString := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
@@ -47,6 +58,19 @@ func NewPostgres(creds models.PostgresCredentials) (TicketRepository, error) {
 
 	return PostgresRepository{
 		db: db,
+	}, nil
+}
+
+func NewDynamoDB(table string) (DynamoDBRepository, error) {
+	cfg, err := config.LoadDefaultConfig(context.TODO())
+	if err != nil {
+		log.Fatalf("unable to load SDK config, %v", err)
+	}
+	ddbClient := dynamodb.NewFromConfig(cfg)
+
+	return DynamoDBRepository{
+		ddb:       ddbClient,
+		TableName: table,
 	}, nil
 }
 
@@ -94,6 +118,68 @@ func (pr PostgresRepository) SaveTicket(t Ticket) (Ticket, error) {
 	INSERT INTO tickets(id, location_id, start_epoch, stop_epoch, duration_seconds, payment_id) VALUES($1, $2, $3, $4, $5, $6) ON CONFLICT ON CONSTRAINT tickets_id_location_id_key
 	DO UPDATE SET start_epoch=$3, stop_epoch=$4, duration_seconds=$5, payment_id=$6`
 	_, err := pr.db.Exec(insertStatement, t.Id, t.Location, t.Start, t.Stop, t.Duration, t.Payment)
+	if err != nil {
+		return Ticket{}, err
+	}
+	return t, nil
+}
+
+func (dr DynamoDBRepository) GetTicket(location, id string) (Ticket, error) {
+	getItemInput := &dynamodb.GetItemInput{
+		TableName: &dr.TableName,
+		Key: map[string]types.AttributeValue{
+			"PK": &types.AttributeValueMemberS{Value: fmt.Sprintf("T#%s", id)},
+			"SK": &types.AttributeValueMemberS{Value: fmt.Sprintf("T#%s", id)},
+		},
+	}
+
+	getItemResult, err := dr.ddb.GetItem(context.Background(), getItemInput)
+	if err != nil {
+		return Ticket{}, err
+	}
+	if getItemResult.Item == nil {
+		return Ticket{}, fmt.Errorf("ticket not found")
+	}
+
+	start, err := strconv.ParseInt(getItemResult.Item["start"].(*types.AttributeValueMemberN).Value, 10, 64)
+	if err != nil {
+		return Ticket{}, err
+	}
+	stop, err := strconv.ParseInt(getItemResult.Item["stop"].(*types.AttributeValueMemberN).Value, 10, 64)
+	if err != nil {
+		return Ticket{}, err
+	}
+	duration, err := strconv.ParseInt(getItemResult.Item["duration"].(*types.AttributeValueMemberN).Value, 10, 64)
+	if err != nil {
+		return Ticket{}, err
+	}
+	ticket := Ticket{
+		Id:       getItemResult.Item["id"].(*types.AttributeValueMemberS).Value,
+		Location: getItemResult.Item["location"].(*types.AttributeValueMemberS).Value,
+		Start:    start,
+		Stop:     stop,
+		Duration: duration,
+		Payment:  getItemResult.Item["payment"].(*types.AttributeValueMemberS).Value,
+	}
+
+	return ticket, nil
+}
+
+func (dr DynamoDBRepository) SaveTicket(t Ticket) (Ticket, error) {
+	putItemInput := &dynamodb.PutItemInput{
+		TableName: &dr.TableName,
+		Item: map[string]types.AttributeValue{
+			"PK":       &types.AttributeValueMemberS{Value: fmt.Sprintf("T#%s", t.Id)},
+			"SK":       &types.AttributeValueMemberS{Value: fmt.Sprintf("T#%s", t.Id)},
+			"id":       &types.AttributeValueMemberS{Value: t.Id},
+			"location": &types.AttributeValueMemberS{Value: t.Location},
+			"start":    &types.AttributeValueMemberN{Value: fmt.Sprintf("%d", t.Start)},
+			"stop":     &types.AttributeValueMemberN{Value: fmt.Sprintf("%d", t.Stop)},
+			"duration": &types.AttributeValueMemberN{Value: fmt.Sprintf("%d", t.Duration)},
+			"payment":  &types.AttributeValueMemberS{Value: t.Payment},
+		},
+	}
+	_, err := dr.ddb.PutItem(context.Background(), putItemInput)
 	if err != nil {
 		return Ticket{}, err
 	}
