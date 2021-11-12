@@ -26,14 +26,16 @@ provider:
         # lambda silently times out if permission is not allowed, regardless of VPCE/security groups
         - Effect: "Allow"
           Action:
-            - secretsmanager:GetSecretValue
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
           Resource:
-            - !Ref postgresSecret
+            - !GetAtt ParkingBoothTable.Arn
 
   environment:
     TICKET_REPORT_BUCKET: !Ref TicketReportBucket
     ACCOUNT_REPORT_BUCKET: !Ref AccountReportBucket
-    DB_SECRET_ARN: !Ref postgresSecret
+    TABLE: !Ref ParkingBoothTable
 
 package:
   patterns:
@@ -48,10 +50,6 @@ functions:
       - http:
           path: /ticket/in
           method: post
-    vpc:
-      subnetIds: ${file(./serverless.${self:provider.stage}.yml):subnets}
-      securityGroupIds:
-        - !Ref lambdaSecurityGroup
 
   completeTicket:
     handler: bin/complete-ticket
@@ -60,10 +58,6 @@ functions:
       - http:
           path: /ticket/out
           method: post
-    vpc:
-      subnetIds: ${file(./serverless.${self:provider.stage}.yml):subnets}
-      securityGroupIds:
-        - !Ref lambdaSecurityGroup
 
   payTicket:
     handler: bin/pay-ticket
@@ -72,10 +66,6 @@ functions:
       - http:
           path: /ticket/pay
           method: post
-    vpc:
-      subnetIds: ${file(./serverless.${self:provider.stage}.yml):subnets}
-      securityGroupIds:
-        - !Ref lambdaSecurityGroup
 
   generateTicketReport:
     handler: bin/generate-ticket-report
@@ -87,8 +77,7 @@ functions:
 
 resources:
   - ${file(./cfn-resources/s3-resources.yaml)}
-  - ${file(./cfn-resources/vpc-resources.yaml)}
+  - ${file(./cfn-resources/ddb-resources.yaml)}
   # - ${file(./cfn-resources/eventbridge-resources.yaml)}
   # - ${file(./cfn-resources/sfn-resources.yaml)}
   # - ${file(./cfn-resources/iam-resources.yaml)}
-  - ${file(./cfn-resources/rds-resources.yaml)}
