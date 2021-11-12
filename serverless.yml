@@ -46,8 +46,8 @@ provider:
             - !GetAtt AccountTable.Arn
 
   environment:
-    TICKET_REPORT_BUCKET: !Ref TicketReportBucket
-    ACCOUNT_REPORT_BUCKET: !Ref AccountReportBucket
+    TICKETBUCKET: !Ref TicketEventBucket
+    ACCOUNTBUCKET: !Ref AccountEventBucket
     TICKETTABLE: !Ref TicketTable
     LOCATIONTABLE: !Ref LocationTable
     ACCOUNTTABLE: !Ref AccountTable
