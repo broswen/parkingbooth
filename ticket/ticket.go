@@ -3,16 +3,19 @@ package ticket
 import (
 	"time"
 
+	"github.com/broswen/parkingbooth/location"
 	"github.com/google/uuid"
 )
 
 type Service struct {
-	repo TicketRepository
+	ticketRepo   TicketRepository
+	locationRepo location.LocationRepository
 }
 
-func NewService(repo TicketRepository) (*Service, error) {
+func NewService(ticketRepo TicketRepository, locationRepo location.LocationRepository) (*Service, error) {
 	return &Service{
-		repo: repo,
+		ticketRepo:   ticketRepo,
+		locationRepo: locationRepo,
 	}, nil
 }
 
@@ -27,7 +30,7 @@ func (ts *Service) GenerateTicket(location string) (Ticket, error) {
 		Location: location,
 		Start:    time.Now().Unix(),
 	}
-	t, err = ts.repo.SaveTicket(t)
+	t, err = ts.ticketRepo.SaveTicket(t)
 	if err != nil {
 		return Ticket{}, err
 	}
@@ -36,7 +39,7 @@ func (ts *Service) GenerateTicket(location string) (Ticket, error) {
 }
 
 func (ts *Service) GetTicket(location, id string) (Ticket, error) {
-	t, err := ts.repo.GetTicket(location, id)
+	t, err := ts.ticketRepo.GetTicket(location, id)
 	if err != nil {
 		return Ticket{}, err
 	}
@@ -50,7 +53,7 @@ func (ts *Service) CompleteTicket(location, id string) (Ticket, error) {
 	}
 	ticket.Stop = time.Now().Unix()
 	ticket.Duration = ticket.Stop - ticket.Start
-	ticket, err = ts.repo.SaveTicket(ticket)
+	ticket, err = ts.ticketRepo.SaveTicket(ticket)
 	if err != nil {
 		return Ticket{}, err
 	}
@@ -65,7 +68,7 @@ func (ts *Service) PayTicket(location, id string, payment string) (Ticket, error
 	}
 
 	ticket.Payment = payment
-	ticket, err = ts.repo.SaveTicket(ticket)
+	ticket, err = ts.ticketRepo.SaveTicket(ticket)
 	if err != nil {
 		return Ticket{}, err
 	}

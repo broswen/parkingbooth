@@ -3,6 +3,8 @@ package ticket
 import (
 	"reflect"
 	"testing"
+
+	"github.com/broswen/parkingbooth/location"
 )
 
 func TestGenerateTicket(t *testing.T) {
@@ -11,7 +13,12 @@ func TestGenerateTicket(t *testing.T) {
 		t.Fatalf("init map repo: %v\n", err)
 	}
 
-	service, err := NewService(repo)
+	locationRepo, err := location.NewMap()
+	if err != nil {
+		t.Fatalf("init location map repo: %v\n", err)
+	}
+
+	service, err := NewService(repo, locationRepo)
 	if err != nil {
 		t.Fatalf("init ticket service: %v\n", err)
 	}
@@ -38,7 +45,12 @@ func TestCompleteTicket(t *testing.T) {
 		t.Fatalf("init map repo: %v\n", err)
 	}
 
-	service, err := NewService(repo)
+	locationRepo, err := location.NewMap()
+	if err != nil {
+		t.Fatalf("init location map repo: %v\n", err)
+	}
+
+	service, err := NewService(repo, locationRepo)
 	if err != nil {
 		t.Fatalf("init ticket service: %v\n", err)
 	}
@@ -60,7 +72,12 @@ func TestPayTicket(t *testing.T) {
 		t.Fatalf("init map repo: %v\n", err)
 	}
 
-	service, err := NewService(repo)
+	locationRepo, err := location.NewMap()
+	if err != nil {
+		t.Fatalf("init location map repo: %v\n", err)
+	}
+
+	service, err := NewService(repo, locationRepo)
 	if err != nil {
 		t.Fatalf("init ticket service: %v\n", err)
 	}
