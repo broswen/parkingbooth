@@ -128,7 +128,7 @@ func (dr DynamoDBRepository) GetTicket(location, id string) (Ticket, error) {
 	getItemInput := &dynamodb.GetItemInput{
 		TableName: &dr.TableName,
 		Key: map[string]types.AttributeValue{
-			"PK": &types.AttributeValueMemberS{Value: fmt.Sprintf("T#%s", id)},
+			"PK": &types.AttributeValueMemberS{Value: fmt.Sprintf("L#%s", location)},
 			"SK": &types.AttributeValueMemberS{Value: fmt.Sprintf("T#%s", id)},
 		},
 	}
@@ -169,7 +169,7 @@ func (dr DynamoDBRepository) SaveTicket(t Ticket) (Ticket, error) {
 	putItemInput := &dynamodb.PutItemInput{
 		TableName: &dr.TableName,
 		Item: map[string]types.AttributeValue{
-			"PK":       &types.AttributeValueMemberS{Value: fmt.Sprintf("T#%s", t.Id)},
+			"PK":       &types.AttributeValueMemberS{Value: fmt.Sprintf("L#%s", t.Location)},
 			"SK":       &types.AttributeValueMemberS{Value: fmt.Sprintf("T#%s", t.Id)},
 			"id":       &types.AttributeValueMemberS{Value: t.Id},
 			"location": &types.AttributeValueMemberS{Value: t.Location},
