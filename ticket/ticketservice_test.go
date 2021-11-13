@@ -3,12 +3,10 @@ package ticket
 import (
 	"reflect"
 	"testing"
-
-	"github.com/broswen/parkingbooth/repository"
 )
 
 func TestGenerateTicket(t *testing.T) {
-	repo, err := repository.NewMap()
+	repo, err := NewMap()
 	if err != nil {
 		t.Fatalf("init map repo: %v\n", err)
 	}
@@ -35,7 +33,7 @@ func TestGenerateTicket(t *testing.T) {
 }
 
 func TestCompleteTicket(t *testing.T) {
-	repo, err := repository.NewMap()
+	repo, err := NewMap()
 	if err != nil {
 		t.Fatalf("init map repo: %v\n", err)
 	}
@@ -57,7 +55,7 @@ func TestCompleteTicket(t *testing.T) {
 }
 
 func TestPayTicket(t *testing.T) {
-	repo, err := repository.NewMap()
+	repo, err := NewMap()
 	if err != nil {
 		t.Fatalf("init map repo: %v\n", err)
 	}

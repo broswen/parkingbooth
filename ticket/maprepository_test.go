@@ -1,4 +1,4 @@
-package repository
+package ticket
 
 import (
 	"reflect"
