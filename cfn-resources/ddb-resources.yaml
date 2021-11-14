@@ -13,6 +13,8 @@ Resources:
           KeyType: HASH
         - AttributeName: SK
           KeyType: RANGE
+      KinesisStreamSpecification:
+        StreamArn: !GetAtt TicketDataStream.Arn
 
   LocationTable:
     Type: AWS::DynamoDB::Table

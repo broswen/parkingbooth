@@ -82,17 +82,13 @@ functions:
           path: /ticket/pay
           method: post
 
-  generateTicketReport:
-    handler: bin/generate-ticket-report
+  processEvents:
+    handler: bin/process-events
     reservedConcurrency: 1
-
-  generateAccountReport:
-    handler: bin/generate-account-report
-    reservedConcurrency: 1
+    timeout: 60
 
 resources:
   - ${file(./cfn-resources/s3-resources.yaml)}
   - ${file(./cfn-resources/ddb-resources.yaml)}
-  # - ${file(./cfn-resources/eventbridge-resources.yaml)}
-  # - ${file(./cfn-resources/sfn-resources.yaml)}
-  # - ${file(./cfn-resources/iam-resources.yaml)}
+  - ${file(./cfn-resources/kinesis-resources.yaml)}
+  - ${file(./cfn-resources/iam-resources.yaml)}

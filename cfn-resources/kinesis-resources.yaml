@@ -1,0 +1,23 @@
+Resources:
+  TicketDataStream:
+    Type: AWS::Kinesis::Stream
+    Properties:
+      ShardCount: 1
+
+  TicketDeliveryStream:
+    Type: AWS::KinesisFirehose::DeliveryStream
+    Properties:
+      DeliveryStreamType: KinesisStreamAsSource
+      KinesisStreamSourceConfiguration:
+        KinesisStreamARN: !GetAtt TicketDataStream.Arn
+        RoleARN: !GetAtt TicketDeliveryRole.Arn
+      ExtendedS3DestinationConfiguration:
+        BucketARN: !GetAtt TicketEventBucket.Arn
+        RoleARN: !GetAtt TicketDeliveryRole.Arn
+        ProcessingConfiguration:
+          Enabled: true
+          Processors:
+            - Type: Lambda
+              Parameters:
+                - ParameterName: LambdaArn
+                  ParameterValue: !GetAtt ProcessEventsLambdaFunction.Arn
