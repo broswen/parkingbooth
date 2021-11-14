@@ -214,7 +214,6 @@ func (dr DynamoDBRepository) AddEvent(e AccountEvent) error {
 			"location":  &types.AttributeValueMemberS{Value: e.Location},
 			"time":      &types.AttributeValueMemberN{Value: fmt.Sprintf("%d", e.Time)},
 		},
-		ConditionExpression: aws.String("attribute_exists(PK)"),
 	}
 
 	_, err := dr.ddb.PutItem(context.Background(), putItemInput)

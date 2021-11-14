@@ -6,6 +6,7 @@ build: clean
 	env CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -ldflags="-s -w" -o bin/complete-ticket complete-ticket/main.go
 	env CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -ldflags="-s -w" -o bin/pay-ticket pay-ticket/main.go
 	env CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -ldflags="-s -w" -o bin/process-events process-events/main.go
+	env CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -ldflags="-s -w" -o bin/add-event add-event/main.go
 
 clean:
 	rm -rf ./bin 

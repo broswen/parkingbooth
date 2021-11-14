@@ -82,6 +82,14 @@ functions:
           path: /ticket/pay
           method: post
 
+  addEvent:
+    handler: bin/add-event
+    reservedConcurrency: 1
+    events:
+      - http:
+          path: /account/event
+          method: post
+
   processEvents:
     handler: bin/process-events
     reservedConcurrency: 1

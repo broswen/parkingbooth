@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/broswen/parkingbooth/account"
 )
 
 type ErrorReponse struct {
@@ -23,6 +24,12 @@ type PayTicketRequest struct {
 	Location string `json:"location"`
 	Id       string `json:"id"`
 	Payment  string `json:"payment"`
+}
+
+type AddEventRequest struct {
+	Location  string                   `json:"location"`
+	AccountId string                   `json:"accountId"`
+	Type      account.AccountEventType `json:"type"`
 }
 
 type APIGResponse events.APIGatewayProxyResponse
