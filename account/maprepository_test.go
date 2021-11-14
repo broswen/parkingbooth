@@ -3,6 +3,7 @@ package account
 import (
 	"reflect"
 	"testing"
+	"time"
 )
 
 func TestCreateAccount(t *testing.T) {
@@ -58,5 +59,35 @@ func TestCreateAccount(t *testing.T) {
 	if err == nil {
 		t.Fatalf("deleted account should throw error: %#v\n", err)
 
+	}
+}
+
+func TestAddEvent(t *testing.T) {
+	repo, err := NewMap()
+	if err != nil {
+		t.Fatalf("init map repo: %v\n", err)
+	}
+
+	a1 := Account{
+		Id:    "test",
+		Name:  "test account",
+		Email: "contact email",
+	}
+
+	_, err = repo.CreateAccount(a1)
+	if err != nil {
+		t.Fatalf("save account: %v\n", err)
+	}
+	event := AccountEvent{
+		Id:        "1",
+		AccountId: a1.Id,
+		Type:      InEvent,
+		Location:  "location",
+		Time:      time.Now().Unix(),
+	}
+
+	err = repo.AddEvent(event)
+	if err != nil {
+		t.Fatalf("add event: %v\n", err)
 	}
 }

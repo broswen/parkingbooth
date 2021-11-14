@@ -25,6 +25,7 @@ type AccountEvent struct {
 
 type AccountRepository interface {
 	GetAccount(id string) (Account, error)
+	AddEvent(e AccountEvent) error
 	CreateAccount(a Account) (Account, error)
 	UpdateAccount(a Account) (Account, error)
 	DeleteAccount(a Account) error
@@ -32,11 +33,13 @@ type AccountRepository interface {
 
 type MapRepository struct {
 	m map[string]Account
+	e map[string][]AccountEvent
 }
 
 func NewMap() (AccountRepository, error) {
 	return MapRepository{
 		m: make(map[string]Account, 0),
+		e: make(map[string][]AccountEvent, 0),
 	}, nil
 }
 
@@ -46,6 +49,7 @@ func (mr MapRepository) CreateAccount(a Account) (Account, error) {
 		return Account{}, fmt.Errorf("account with id already exists")
 	}
 	mr.m[a.Id] = a
+	mr.e[a.Id] = make([]AccountEvent, 0)
 	return a, nil
 }
 
@@ -68,5 +72,15 @@ func (mr MapRepository) UpdateAccount(a Account) (Account, error) {
 
 func (mr MapRepository) DeleteAccount(a Account) error {
 	delete(mr.m, a.Id)
+	delete(mr.e, a.Id)
+	return nil
+}
+
+func (mr MapRepository) AddEvent(e AccountEvent) error {
+	events, ok := mr.e[e.AccountId]
+	if !ok {
+		return fmt.Errorf("account doesn't exist")
+	}
+	mr.e[e.AccountId] = append(events, e)
 	return nil
 }
