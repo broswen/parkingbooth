@@ -21,3 +21,7 @@ func (as *Service) UpdateAccount(a Account) (Account, error) {
 func (as *Service) DeleteAccount(a Account) error {
 	return as.accountRepo.DeleteAccount(a)
 }
+
+func (as *Service) AddEvent(e AccountEvent) error {
+	return as.accountRepo.AddEvent(e)
+}
