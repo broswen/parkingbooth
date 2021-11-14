@@ -18,6 +18,12 @@ func TestGenerateTicket(t *testing.T) {
 		t.Fatalf("init location map repo: %v\n", err)
 	}
 
+	locationRepo.SaveLocation(location.Location{
+		Id:          "test",
+		Name:        "test",
+		Description: "test location",
+	})
+
 	service, err := NewService(repo, locationRepo)
 	if err != nil {
 		t.Fatalf("init ticket service: %v\n", err)
@@ -49,6 +55,11 @@ func TestCompleteTicket(t *testing.T) {
 	if err != nil {
 		t.Fatalf("init location map repo: %v\n", err)
 	}
+	locationRepo.SaveLocation(location.Location{
+		Id:          "test",
+		Name:        "test",
+		Description: "test location",
+	})
 
 	service, err := NewService(repo, locationRepo)
 	if err != nil {
@@ -76,6 +87,12 @@ func TestPayTicket(t *testing.T) {
 	if err != nil {
 		t.Fatalf("init location map repo: %v\n", err)
 	}
+
+	locationRepo.SaveLocation(location.Location{
+		Id:          "test",
+		Name:        "test",
+		Description: "test location",
+	})
 
 	service, err := NewService(repo, locationRepo)
 	if err != nil {

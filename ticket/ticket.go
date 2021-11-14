@@ -20,6 +20,11 @@ func NewService(ticketRepo TicketRepository, locationRepo location.LocationRepos
 }
 
 func (ts *Service) GenerateTicket(location string) (Ticket, error) {
+	l, err := ts.locationRepo.GetLocation(location)
+	if err != nil {
+		return Ticket{}, err
+	}
+
 	id, err := uuid.NewRandom()
 	if err != nil {
 		return Ticket{}, err
@@ -27,7 +32,7 @@ func (ts *Service) GenerateTicket(location string) (Ticket, error) {
 
 	t := Ticket{
 		Id:       id.String(),
-		Location: location,
+		Location: l.Id,
 		Start:    time.Now().Unix(),
 	}
 	t, err = ts.ticketRepo.SaveTicket(t)
