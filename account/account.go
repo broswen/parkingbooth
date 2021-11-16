@@ -3,16 +3,19 @@ package account
 import (
 	"time"
 
+	"github.com/broswen/parkingbooth/location"
 	"github.com/google/uuid"
 )
 
 type Service struct {
-	accountRepo AccountRepository
+	accountRepo  AccountRepository
+	locationRepo location.LocationRepository
 }
 
-func NewService(accountRepo AccountRepository) (*Service, error) {
+func NewService(accountRepo AccountRepository, locationRepo location.LocationRepository) (*Service, error) {
 	return &Service{
-		accountRepo: accountRepo,
+		accountRepo:  accountRepo,
+		locationRepo: locationRepo,
 	}, nil
 }
 
@@ -34,6 +37,11 @@ func (as *Service) GetAccount(id string) (Account, error) {
 
 func (as *Service) AddEvent(e AccountEvent) error {
 	_, err := as.GetAccount(e.AccountId)
+	if err != nil {
+		return err
+	}
+
+	_, err = as.locationRepo.GetLocation(e.Location)
 	if err != nil {
 		return err
 	}

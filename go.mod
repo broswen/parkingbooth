@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/aws/aws-lambda-go v1.27.0
+	github.com/aws/aws-sdk-go-v2 v1.11.0
 	github.com/aws/aws-sdk-go-v2/config v1.10.0
 	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.7.0
 	github.com/fnproject/fdk-go v0.0.12
@@ -13,7 +14,6 @@ require (
 )
 
 require (
-	github.com/aws/aws-sdk-go-v2 v1.11.0 // indirect
 	github.com/aws/aws-sdk-go-v2/credentials v1.6.0 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.8.0 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.0 // indirect

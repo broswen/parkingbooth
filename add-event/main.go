@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/broswen/parkingbooth/account"
+	"github.com/broswen/parkingbooth/location"
 	"github.com/broswen/parkingbooth/models"
 )
 
@@ -38,7 +39,11 @@ func init() {
 	if err != nil {
 		log.Fatalf("new account repository: %v\n", err)
 	}
-	accountService, err = account.NewService(accountRepo)
+	locationRepo, err := location.NewDynamoDB(os.Getenv("LOCATIONTABLE"))
+	if err != nil {
+		log.Fatalf("new location repository: %v\n", err)
+	}
+	accountService, err = account.NewService(accountRepo, locationRepo)
 	if err != nil {
 		log.Fatalf("new account service: %v\n", err)
 	}
